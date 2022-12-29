@@ -232,10 +232,17 @@ run: \
 
 run-all: ## start all supported local backends
 run-all: \
+	run-clickhouse \
 	run-es \
 	run-mongo \
 	run-swift
 .PHONY: run-all
+
+run-clickhouse: ## start clickhouse backend
+	@$(COMPOSE) up -d clickhouse
+	@echo "Waiting for clickhouse to be up and running..."
+	@$(COMPOSE_RUN) dockerize -wait tcp://clickhouse:9000 -timeout 60s
+.PHONY: run-clickhouse
 
 run-es: ## start elasticsearch backend
 	@$(COMPOSE) up -d elasticsearch
@@ -243,12 +250,19 @@ run-es: ## start elasticsearch backend
 	@$(COMPOSE_RUN) dockerize -wait tcp://elasticsearch:9200 -timeout 60s
 .PHONY: run-es
 
-run-lrs: ## run LRS server with the runserver backend (development mode)
+run-lrs: ## run LRS server with the runserver backend and mongo (development mode)
 run-lrs: \
 	run-es \
 	run-mongo
 	@$(COMPOSE) up -d app
 .PHONY: run-lrs
+
+run-lrs-clickhouse: ## run LRS server with the runserver backend and clickhouse (development mode)
+run-lrs-clickhouse: \
+	run-es \
+	run-clickhouse
+	@$(COMPOSE) up -d app
+.PHONY: run-lrs-clickhouse
 
 run-mongo: ## start mongodb backend
 	@$(COMPOSE) up -d mongo
@@ -271,7 +285,8 @@ stop: ## stops backend servers
 .PHONY: stop
 
 test: ## run back-end tests
-test: run
+test: run-lrs \
+	run-clickhouse
 	bin/pytest
 .PHONY: test
 
