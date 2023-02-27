@@ -212,7 +212,7 @@ jobs:
             dockerize \
               -wait tcp://${HOSTNAME}:9200 \
               -wait tcp://${HOSTNAME}:27017 \
-              -wait tcp://${HOSTNAME}:8123 \
+              -wait tcp://${HOSTNAME}:9000 \
               -timeout 60s \
               ~/.local/bin/pytest
 
