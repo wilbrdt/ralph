@@ -124,11 +124,8 @@ jobs:
   # ---- Backend jobs ----
   # Build backend development environment
   build:
-    parameters:
-      python-image:
-        type: string
     docker:
-      - image: cimg/<< parameters.python-image >>
+      - image: cimg/python:3.11
         auth:
           username: $DOCKER_HUB_USER
           password: $DOCKER_HUB_PASSWORD
@@ -137,14 +134,14 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-<< parameters.python-image >>-{{ .Revision }}
+            - v1-dependencies-{{ .Revision }}
       - run:
           name: Install development dependencies
           command: pip install --user .[backend-clickhouse,backend-es,backend-ldp,backend-mongo,backend-swift,backend-ws,cli,dev,lrs]
       - save_cache:
           paths:
             - ~/.local
-          key: v1-dependencies-<< parameters.python-image >>-{{ .Revision }}
+          key: v1-dependencies-{{ .Revision }}
 
   # lint:
   #   docker:
@@ -178,11 +175,8 @@ jobs:
   #         command: ~/.local/bin/pydocstyle
 
   test:
-    parameters:
-      python-image:
-        type: string
     docker:
-      - image: cimg/<< parameters.python-image >>
+      - image: cimg/python:3.11
         auth:
           username: $DOCKER_HUB_USER
           password: $DOCKER_HUB_PASSWORD
@@ -208,7 +202,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-<< parameters.python-image >>-{{ .Revision }}
+            - v1-dependencies-{{ .Revision }}
       - run:
           name: Run tests
           command: |
@@ -220,11 +214,8 @@ jobs:
               ~/.local/bin/pytest
 
   test-library:
-    parameters:
-      python-image:
-        type: string
     docker:
-      - image: cimg/<< parameters.python-image >>
+      - image: cimg/python:3.11
         auth:
           username: $DOCKER_HUB_USER
           password: $DOCKER_HUB_PASSWORD
@@ -517,9 +508,6 @@ workflows:
       # Build, lint and test production and development Docker images
       # (debian-based)
       - build:
-          matrix:
-            parameters:
-              python-image: [python:3.8, python:3.9, python:3.10, python:3.11]
           filters:
             tags:
               only: /.*/
@@ -530,19 +518,12 @@ workflows:
       #       tags:
       #         only: /.*/
       - test:
-          matrix:
-            parameters:
-              python-image: [python:3.8, python:3.9, python:3.10, python:3.11]
           requires:
             - build
           filters:
             tags:
               only: /.*/
       - test-library:
-          matrix:
-            parameters:
-              python-image:
-                [python:3.7, python:3.8, python:3.9, python:3.10, python:3.11]
           filters:
             tags:
               only: /.*/
