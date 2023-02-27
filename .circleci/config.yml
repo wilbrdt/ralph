@@ -197,6 +197,9 @@ jobs:
         auth:
           username: $DOCKER_HUB_USER
           password: $DOCKER_HUB_PASSWORD
+        environment:
+          CLICKHOUSE_DB: xapi
+          CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
     working_directory: ~/fun
     steps:
       - checkout
